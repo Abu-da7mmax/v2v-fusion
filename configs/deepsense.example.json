@@ -1,0 +1,121 @@
+{
+  "source": "deepsense-v2v",
+  "drives": [
+    {
+      "id": "36",
+      "csv": "../data/Scenario36/scenario36.csv",
+      "columns": {
+        "id": "index",
+        "camera": [
+          "REPLACE_RGB180_VIEW_A",
+          "REPLACE_RGB180_VIEW_B"
+        ],
+        "lidar": "REPLACE_LIDAR_PATH",
+        "rf": [
+          "REPLACE_PWR1",
+          "REPLACE_PWR2",
+          "REPLACE_PWR3",
+          "REPLACE_PWR4"
+        ],
+        "ego_gps": [
+          "REPLACE_UNIT1_LAT",
+          "REPLACE_UNIT1_LON"
+        ],
+        "peer_gps": [
+          "REPLACE_UNIT2_LAT",
+          "REPLACE_UNIT2_LON"
+        ]
+      }
+    },
+    {
+      "id": "37",
+      "csv": "../data/Scenario37/scenario37.csv",
+      "columns": {
+        "id": "index",
+        "camera": [
+          "REPLACE_RGB180_VIEW_A",
+          "REPLACE_RGB180_VIEW_B"
+        ],
+        "lidar": "REPLACE_LIDAR_PATH",
+        "rf": [
+          "REPLACE_PWR1",
+          "REPLACE_PWR2",
+          "REPLACE_PWR3",
+          "REPLACE_PWR4"
+        ],
+        "ego_gps": [
+          "REPLACE_UNIT1_LAT",
+          "REPLACE_UNIT1_LON"
+        ],
+        "peer_gps": [
+          "REPLACE_UNIT2_LAT",
+          "REPLACE_UNIT2_LON"
+        ]
+      }
+    },
+    {
+      "id": "38",
+      "csv": "../data/Scenario38/scenario38.csv",
+      "columns": {
+        "id": "index",
+        "camera": [
+          "REPLACE_RGB180_VIEW_A",
+          "REPLACE_RGB180_VIEW_B"
+        ],
+        "lidar": "REPLACE_LIDAR_PATH",
+        "rf": [
+          "REPLACE_PWR1",
+          "REPLACE_PWR2",
+          "REPLACE_PWR3",
+          "REPLACE_PWR4"
+        ],
+        "ego_gps": [
+          "REPLACE_UNIT1_LAT",
+          "REPLACE_UNIT1_LON"
+        ],
+        "peer_gps": [
+          "REPLACE_UNIT2_LAT",
+          "REPLACE_UNIT2_LON"
+        ]
+      }
+    },
+    {
+      "id": "39",
+      "csv": "../data/Scenario39/scenario39.csv",
+      "columns": {
+        "id": "index",
+        "camera": [
+          "REPLACE_RGB180_VIEW_A",
+          "REPLACE_RGB180_VIEW_B"
+        ],
+        "lidar": "REPLACE_LIDAR_PATH",
+        "rf": [
+          "REPLACE_PWR1",
+          "REPLACE_PWR2",
+          "REPLACE_PWR3",
+          "REPLACE_PWR4"
+        ],
+        "ego_gps": [
+          "REPLACE_UNIT1_LAT",
+          "REPLACE_UNIT1_LON"
+        ],
+        "peer_gps": [
+          "REPLACE_UNIT2_LAT",
+          "REPLACE_UNIT2_LON"
+        ]
+      }
+    }
+  ],
+  "split": {
+    "train": [
+      "36",
+      "38"
+    ],
+    "val": [
+      "37"
+    ],
+    "test": [
+      "39"
+    ]
+  }
+}
