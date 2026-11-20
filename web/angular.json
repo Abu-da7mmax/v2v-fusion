@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "cli": {"analytics": false},
+  "projects": {
+    "dashboard": {
+      "projectType": "application", "root": "", "sourceRoot": "src",
+      "architect": {
+        "build": {"builder": "@angular/build:application", "options": {
+          "browser": "src/main.ts", "index": "src/index.html", "tsConfig": "tsconfig.json",
+          "styles": ["src/styles.css"], "outputPath": "dist/dashboard"
+        }},
+        "serve": {"builder": "@angular/build:dev-server", "options": {"buildTarget": "dashboard:build"}}
+      }
+    }
+  }
+}
