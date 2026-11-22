@@ -6,7 +6,7 @@ Estimate the horizontal position of a peer vehicle relative to an instrumented r
 
 | Result | Status |
 | --- | --- |
-| Original senior project, approximately 3 m error | User-reported historical figure. Original metric, scenario, checkpoint and split are unknown. |
+| Original senior project, approximately 3 m error | Original report, Table 5: 3.0 m 3D RMSE, 1.9 m median 3D error and 94.7% heading accuracy within ±15° over 1,000 Scenario 36 samples. Original checkpoint and raw replay assets are needed to reproduce these historical results. |
 | DeepSense-V2V reconstruction | Real-data evaluation pending. The archive requires dataset sign-in and local extraction. |
 | Synthetic integration check | Three training epochs, with 32/12/16 train/validation/test samples. Fusion mean error 15.58 m and training-mean baseline 15.55 m. These numbers describe only the generated fixture and do not characterize DeepSense performance. |
 
@@ -65,9 +65,25 @@ Pass `--all` to the inspection command for a full decode check before a long run
 
 The camera and LiDAR CNNs and RF dense encoder feed a late-fusion regression head with two outputs, east and north in metres. GPS is used only for target construction. The Huber loss is optimized on the training split. The checkpoint with lowest validation loss is loaded once for the held-out test. The comparator always predicts the mean training offset. Mean, RMSE, median and P90 use the Euclidean norm of each two-axis residual.
 
-Each run saves `model.keras`, `history.json`, `split.json`, `predictions.csv` and `report.json` with parameters and manifest hashes. The dashboard reads the report and paginates the per-sample predictions. Keep the original sensor files and record their release version for forensic reproducibility. Seeded runs can still vary across hardware and TensorFlow versions.
+Each run saves `model.keras`, `history.json`, `split.json`, `predictions.csv` and `report.json` with parameters and manifest hashes. The Dashboard and Dataset Explorer reproduce the report navigation, archived sensor panels, route summaries and original evaluation tables. The Demo tab reads the current horizontal-position run from FastAPI and paginates the per-sample predictions. Keep the original sensor files and record their release version for forensic reproducibility. Seeded runs can still vary across hardware and TensorFlow versions.
 
 The target axes are geographic and the sensor tensors are vehicle-mounted. Without vehicle heading, the geographic direction can be ambiguous from a single snapshot. Test performance therefore depends on route coverage and sensor cues. GPS errors, synchronization offsets, beam sweep timing, and LiDAR cropping also affect the achievable accuracy. This is an offline localization experiment.
+
+## Deploy the dashboard to Render
+
+Create a Python web service from the repository root on the `main` branch.
+For the free dashboard demo, use the following settings.
+
+| Setting | Value |
+| --- | --- |
+| Build command | `sh deployment/build.sh` |
+| Start command | `python -m uvicorn v2v.api:app --host 0.0.0.0 --port $PORT` |
+| Environment | `PYTHON_VERSION=3.12.13`, `NODE_VERSION=24.15.0`, `V2V_RUN_DIR=deployment/demo` |
+| HTTP health check | `/api/overview` |
+
+The web service serves the Angular interface and FastAPI at the same origin.
+The bundled report and CSV in `deployment/demo` come from the synthetic smoke test.
+Model training and raw DeepSense data are managed separately from the public dashboard.
 
 ## Repository layout
 

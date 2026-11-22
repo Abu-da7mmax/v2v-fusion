@@ -4,6 +4,8 @@ import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 
+import { scenarios, datasetUrl, paperUrl, evaluation, ablation } from './report';
+
 interface Overview {
   target: string;
   modalities: string[];
@@ -34,6 +36,7 @@ interface Page { total: number; rows: Prediction[] }
 
 @Component({
   selector: 'fusion-app',
+  styleUrl: './styles.css',
   imports: [DecimalPipe],
   template: `
     <header><div class="bar"><a href="#overview">V2V Fusion</a><nav aria-label="Page sections"><a href="#overview">Overview</a><a href="#evaluation">Evaluation</a></nav></div></header>
@@ -51,7 +54,7 @@ interface Page { total: number; rows: Prediction[] }
       <section id="evaluation">
         <div class="section-head"><h2>Evaluation</h2>@if (report(); as run) { <a class="button" href="/api/predictions.csv">Download CSV</a> }</div>
         <aside><strong>Historical senior project · ~{{ overview()?.historical?.approx_error_m ?? 3 }} m</strong>
-          <p>User-reported estimate. The original error metric and test split are unknown.</p></aside>
+          <p>Original report, Table 5. 3D RMSE on 1,000 Scenario 36 samples.</p></aside>
         @if (status()) { <p class="notice" role="status">{{ status() }}</p> }
         @if (report(); as run) {
           <h3>{{ run.source === 'synthetic' ? 'Synthetic smoke-test evaluation' : 'DeepSense-V2V held-out evaluation' }}</h3>
@@ -162,4 +165,24 @@ class Dashboard implements OnInit {
   coordinate(value: number, page: Page) { return 50 + (value / this.bound(page)) * 50; }
 }
 
-bootstrapApplication(Dashboard, { providers: [provideHttpClient(), provideZonelessChangeDetection()] }).catch(console.error);
+@Component({
+  selector: 'project-app',
+  imports: [Dashboard, DecimalPipe],
+  templateUrl: './report.html',
+})
+class ProjectApp {
+  readonly sections = ['Dashboard', 'Dataset Explorer', 'How It Works', 'Results', 'Ablation', 'About', 'Demo'];
+  readonly tabs = ['Camera', 'RF', 'LiDAR', 'Predictions'];
+  readonly section = signal('Dashboard');
+  readonly tab = signal('Predictions');
+  readonly scenarios = scenarios;
+  readonly scenario = signal(scenarios[0]);
+  readonly datasetUrl = datasetUrl;
+  readonly paperUrl = paperUrl;
+  readonly evaluation = evaluation;
+  readonly ablation = ablation;
+  readonly metricLabels = ['Samples', 'MAE X (m)', 'MAE Y (m)', 'MAE Z (m)', '3D RMSE (m)',
+    'Median (m)', 'P90 (m)', 'Mean heading error', 'Heading within ±15°'];
+}
+
+bootstrapApplication(ProjectApp, { providers: [provideHttpClient(), provideZonelessChangeDetection()] }).catch(console.error);

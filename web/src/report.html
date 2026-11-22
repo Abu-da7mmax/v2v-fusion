@@ -1,0 +1,126 @@
+<header class="top">
+  <button class="brand" (click)="section.set('Dashboard')">V2V Pose Estimation Visualizer</button>
+  <nav aria-label="Project pages">
+    @for (item of sections; track item) {
+      <button [class.active]="section() === item" [attr.aria-current]="section() === item ? 'page' : null" (click)="section.set(item)">{{item}}</button>
+    }
+  </nav>
+</header>
+@switch (section()) {
+  @case ('Dashboard') {
+    <main class="dashboard">
+      <aside class="samples">
+        <h2>Samples</h2><p>Scenario 36</p>
+        <button class="selected" (click)="tab.set('Predictions')">Report sample<br><small>Figures 12–15</small></button>
+        <p class="note">The report supplies these views. Browsing the full sample list requires the extracted DeepSense files.</p>
+        <button class="outline" (click)="section.set('Dataset Explorer')">Dataset Explorer</button>
+      </aside>
+      <figure class="map">
+        <img src="evidence/map.webp" alt="Original OpenStreetMap dashboard capture with markers around Arizona State University in Tempe">
+        <figcaption>Original map capture · Scenario 36 · OpenStreetMap contributors</figcaption>
+      </figure>
+      <section class="inspect">
+        <nav aria-label="Sample panels">
+          @for (item of tabs; track item) {
+            <button [class.selected]="tab() === item" [attr.aria-pressed]="tab() === item" (click)="tab.set(item)">{{item}}</button>
+          }
+        </nav>
+        <div class="panel">
+          <h1>{{tab()}}</h1>
+          @switch (tab()) {
+            @case ('Camera') {
+              <p>Front-facing Cam1 · RGB frame from the receiver vehicle.</p>
+              <img src="evidence/camera.webp" alt="Original Cam1 road scene showing traffic and buildings in daylight">
+              <p>The report describes six available camera views. It shows the front-facing view for this example and uses 96 × 96 normalized RGB inputs for the vision encoder.</p>
+            }
+            @case ('RF') {
+              <p>Received beam powers · 4 arrays × 64 beams.</p>
+              <img src="evidence/rf.webp" alt="Original RF chart showing four groups of received beam powers">
+              <p>The report identifies beam index 161 as the strongest of the 256 concatenated values in this example. Beam strength helps estimate direction and can vary with blockage and reflections.</p>
+            }
+            @case ('LiDAR') {
+              <p>3D LiDAR point cloud · overhead view.</p>
+              <img src="evidence/lidar.webp" alt="Original LiDAR panel showing the scene point cloud">
+              <p>The screenshot displays about 10,000 points. The raw scan has roughly 32,000 points before filtering and feature extraction.</p>
+            }
+            @default {
+              <p>Ground truth and predicted X, Y, Z offsets and heading for the report sample.</p>
+              <img src="evidence/prediction.webp" alt="Original predictions panel with true and predicted offsets and heading">
+              <p>Position error measures the three-dimensional separation between the two offsets. Heading error is the angular difference.</p>
+            }
+          }
+          <p class="note">Archived view from the original graduation report. The raw sensor values behind the screenshot are required to replay or manipulate this sample.</p>
+        </div>
+      </section>
+    </main>
+  }
+  @case ('Dataset Explorer') {
+    <main class="content">
+      <h1>Dataset Explorer</h1>
+      <p>DeepSense-V2V Testbed 6 recorded two moving vehicles in Arizona, USA. The four releases contain <strong>112,200 synchronized samples</strong>. Unit 1 carries the receiver and the sensing rig. Unit 2 transmits and records its GPS position.</p>
+      <nav class="scenarios" aria-label="Scenarios">
+        @for (item of scenarios; track item.id) {
+          <button [class.selected]="scenario().id === item.id" [attr.aria-pressed]="scenario().id === item.id" (click)="scenario.set(item)">Scenario {{item.id}}</button>
+        }
+      </nav>
+      @let item = scenario();
+      <section class="scenario">
+        <figure><img [src]="'evidence/' + item.id + '.webp'" [alt]="'Published collection route for scenario ' + item.id"><figcaption>GPS route shown in the original report, figures 10–11.</figcaption></figure>
+        <article>
+          <h2>{{item.location}}, Arizona</h2><p>{{item.mode}} · {{item.light}}</p>
+          <dl><dt>Synchronized samples</dt><dd>{{item.count | number}}</dd><dt>Collection duration</dt><dd>{{item.duration}}</dd><dt>Distance traveled</dt><dd>{{item.distance}} km</dd><dt>Average speed</dt><dd>{{item.speed}} km/h</dd></dl>
+          <p>{{item.note}}</p>
+          <p class="note">The published duration describes the collection span. Pauses and filtering can reduce the number of synchronized frames.</p>
+        </article>
+      </section>
+      <h2>What each sample contains</h2>
+      <table><thead><tr><th>Modality</th><th>Available data and role</th></tr></thead><tbody>
+        <tr><th>RGB</th><td>Four 90° or two 180° views from the 360° receiver camera, offering road and object context.</td></tr>
+        <tr><th>LiDAR</th><td>One 3D receiver point cloud, about 32,000 raw points. XYZ and additional return measurements describe scene geometry.</td></tr>
+        <tr><th>RF</th><td>Four 64-beam receive-power vectors at about 60 GHz. Each sweep describes link strength across beam directions.</td></tr>
+        <tr><th>GPS</th><td>Both vehicles’ coordinates. Their relative position supplies supervision for pose estimation.</td></tr>
+        <tr><th>Radar</th><td>Four FMCW radar measurements are included in the dataset. The senior project fuses RF, RGB and LiDAR.</td></tr>
+        <tr><th>Index CSV</th><td>Sample index, timestamps, metadata and paths to synchronized sensor files.</td></tr>
+      </tbody></table>
+      <p><a [href]="datasetUrl">Official data downloads and scenario videos</a> · <a [href]="paperUrl">Dataset paper and route statistics</a></p>
+    </main>
+  }
+  @case ('How It Works') {
+    <main class="content">
+      <h1>How It Works</h1>
+      <p>The original model estimates relative 3D translation and heading from synchronized sensors. GPS provides target labels during training and validation.</p>
+      <section class="pipeline">
+        <article><h2>RF encoder</h2><p>Concatenate the four beam-power files into 256 values, log-transform and standardize the input, then pass it through a 1D CNN.</p></article>
+        <article><h2>Vision encoder</h2><p>Resize the RGB input to 96 × 96 and normalize it. EfficientNetB0 extracts image features for fusion.</p></article>
+        <article><h2>LiDAR encoder</h2><p>Filter zero-range points. Compute mean, standard deviation, minimum, maximum and the 25th and 75th percentiles for each of five channels to form 30 features.</p></article>
+      </section>
+      <h2>Cross-modal attention</h2><p>The three modality embeddings form a three-token sequence. Two self-attention layers let each sensor representation interact with the other two. Separate heads predict position and heading.</p>
+      <h2>Evaluation</h2><p>For each sample, the 3D position error is the Euclidean distance between predicted and true offsets. RMSE gives more weight to large errors. Median describes the midpoint of the errors and P90 the value below which 90% fall. Heading accuracy counts predictions within an angular tolerance.</p>
+    </main>
+  }
+  @case ('Results') {
+    <main class="content">
+      <h1>Model Evaluation</h1><p>Original graduation report, Table 5. Scenario 36 was the evaluated scenario.</p>
+      <div class="summary"><span><strong>3.0 m</strong> 3D RMSE</span><span><strong>1.9 m</strong> median 3D error</span><span><strong>94.7%</strong> heading within ±15°</span></div>
+      <div class="scroll"><table><thead><tr>@for (label of metricLabels; track label) {<th>{{label}}</th>}</tr></thead>
+        <tbody>@for (row of evaluation; track row[0]) {<tr>@for (value of row; track $index) {<td>{{value}}</td>}</tr>}</tbody></table></div>
+      <p class="note">These are the reported original model results. The current repository's synthetic smoke test uses a separate horizontal-position model and is available under Demo.</p>
+    </main>
+  }
+  @case ('Ablation') {
+    <main class="content">
+      <h1>Ablation Study</h1><p>Original report, Table 6. Each entry is 3D RMSE in metres. Smaller values indicate lower error.</p>
+      <div class="scroll"><table><thead><tr><th>Test samples</th><th>Full fusion</th><th>RF only</th><th>Vision only</th><th>LiDAR only</th></tr></thead>
+        <tbody>@for (row of ablation; track row[0]) {<tr>@for (value of row; track $index) {<td>{{value}}</td>}</tr>}</tbody></table></div>
+      <p>At 1,000 samples, full fusion reported 3.0 m against 33.6 m for the best single-modality model in that row, RF only. At the smaller sample sizes, the strongest single modality varies.</p>
+    </main>
+  }
+  @case ('About') {
+    <main class="content"><h1>About the Project</h1>
+      <p>This graduation project estimates the pose of one vehicle relative to another using synchronized radio, vision and LiDAR measurements. The original system used TensorFlow, Angular and FastAPI.</p>
+      <p>The interface follows the report's dashboard layout and uses its original captured sample and evaluation tables. The Dataset Explorer documents all four releases. External data can be obtained through the official DeepSense portal.</p>
+      <p><a [href]="datasetUrl">DeepSense-V2V dataset</a> · <a [href]="paperUrl">Dataset paper</a></p>
+    </main>
+  }
+  @case ('Demo') { <fusion-app /> }
+}

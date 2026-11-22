@@ -1,0 +1,136 @@
+{
+  "source": "synthetic",
+  "seed": 42,
+  "batch_size": 8,
+  "epochs_requested": 3,
+  "best_epoch": 3,
+  "tensorflow": "2.19.1",
+  "config": {
+    "source": "synthetic",
+    "drives": [
+      {
+        "id": "train",
+        "csv": "train/samples.csv",
+        "columns": {
+          "id": "index",
+          "camera": [
+            "rgbA",
+            "rgbB"
+          ],
+          "lidar": "lidar",
+          "rf": [
+            "pwr1",
+            "pwr2",
+            "pwr3",
+            "pwr4"
+          ],
+          "ego_gps": [
+            "ego_lat",
+            "ego_lon"
+          ],
+          "peer_gps": [
+            "peer_lat",
+            "peer_lon"
+          ]
+        }
+      },
+      {
+        "id": "val",
+        "csv": "val/samples.csv",
+        "columns": {
+          "id": "index",
+          "camera": [
+            "rgbA",
+            "rgbB"
+          ],
+          "lidar": "lidar",
+          "rf": [
+            "pwr1",
+            "pwr2",
+            "pwr3",
+            "pwr4"
+          ],
+          "ego_gps": [
+            "ego_lat",
+            "ego_lon"
+          ],
+          "peer_gps": [
+            "peer_lat",
+            "peer_lon"
+          ]
+        }
+      },
+      {
+        "id": "test",
+        "csv": "test/samples.csv",
+        "columns": {
+          "id": "index",
+          "camera": [
+            "rgbA",
+            "rgbB"
+          ],
+          "lidar": "lidar",
+          "rf": [
+            "pwr1",
+            "pwr2",
+            "pwr3",
+            "pwr4"
+          ],
+          "ego_gps": [
+            "ego_lat",
+            "ego_lon"
+          ],
+          "peer_gps": [
+            "peer_lat",
+            "peer_lon"
+          ]
+        }
+      }
+    ],
+    "split": {
+      "train": [
+        "train"
+      ],
+      "val": [
+        "val"
+      ],
+      "test": [
+        "test"
+      ]
+    }
+  },
+  "config_sha256": "f06679c49801afa04266a8f007a8e3c1399a0f90df4c9791a4d9a0c8987b2cdc",
+  "csv_sha256": {
+    "train": "d2f440b312a9a9d58ea080977d1668cdf7dc78f199a40ec828ee2feb82d2bc40",
+    "val": "f3581d68ecb6ac6c01cd982b1dd7590c96df9b4353aef8019a32fab9df11dd27",
+    "test": "39f1241042992e4554cbb672e1b4bcd918068ce81e3f9f2345dae8be12f39cf5"
+  },
+  "counts": {
+    "train": 32,
+    "val": 12,
+    "test": 16
+  },
+  "split": {
+    "train": [
+      "train"
+    ],
+    "val": [
+      "val"
+    ],
+    "test": [
+      "test"
+    ]
+  },
+  "model": {
+    "mean_m": 15.576377868652344,
+    "rmse_m": 16.521947860717773,
+    "median_m": 17.231441497802734,
+    "p90_m": 21.24651336669922
+  },
+  "baseline": {
+    "mean_m": 15.54586410522461,
+    "rmse_m": 16.698612213134766,
+    "median_m": 16.16302490234375,
+    "p90_m": 23.21352767944336
+  }
+}

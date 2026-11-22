@@ -20,7 +20,7 @@ def overview():
     return {
         "target": "Unit 2 relative to Unit 1 in local east/north metres",
         "modalities": ["360-degree RGB coverage", "3D LiDAR", "60 GHz beam powers"],
-        "historical": {"approx_error_m": 3, "metric": None, "status": "user-reported"},
+        "historical": {"approx_error_m": 3, "metric": "3D RMSE", "scenario": 36, "test_samples": 1000, "status": "original-report"},
         "evaluation_available": (RUN / "report.json").is_file(),
     }
 
