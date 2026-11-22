@@ -1,6 +1,17 @@
 # V2V Fusion
 
-Estimate the horizontal position of a peer vehicle relative to an instrumented receiver using synchronized RGB camera views, 3D LiDAR and 60 GHz receive beam powers. TensorFlow trains the estimator. FastAPI serves completed evaluation artifacts and the Angular dashboard.
+**[Open the live dashboard](https://v2v-fusion.onrender.com/)** · **[Explore the FastAPI docs](https://v2v-fusion.onrender.com/docs)**
+
+The senior project used synchronized RGB camera views, 3D LiDAR and 60 GHz beam powers to estimate relative vehicle pose. This repository presents the original evaluation and a runnable TensorFlow reconstruction for horizontal position estimation. FastAPI serves completed evaluation artifacts alongside the Angular dashboard.
+
+| Page | What to explore |
+| --- | --- |
+| **Dashboard** | An archived Scenario 36 example with the map, camera view, RF beam powers, LiDAR view and predicted pose. |
+| **Dataset Explorer** | Published routes, locations, lighting, sample counts, and collection statistics for Scenarios 36–39. |
+| **How It Works, Results, Ablation** | The original sensor-fusion architecture and the graduation report's results and modality comparisons. |
+| **Demo** | A runnable evaluation browser with 16 synthetic predictions, pagination and CSV export. |
+
+The hosted app serves archived report views and saved synthetic predictions. Raw DeepSense playback requires the recordings, and reproducing the original 3D evaluation requires the original model checkpoint and evaluation inputs. The Render free instance can take about a minute to start after a period of inactivity.
 
 ## Result provenance
 
@@ -12,7 +23,20 @@ Estimate the horizontal position of a peer vehicle relative to an instrumented r
 
 ## Run locally
 
-Use Python 3.12 and Node.js 24. Run commands from the repository root. The CPU workflow works without a GPU.
+Use Python 3.12 and Node.js 24. Run commands from the repository root. To serve the same bundled demo as the live site, build the Angular frontend and point the API at the included results.
+
+```bash
+python -m pip install fastapi==0.115.12 uvicorn==0.34.2
+npm --prefix web ci
+npm --prefix web run build
+export V2V_RUN_DIR=deployment/demo
+# PowerShell equivalent: $env:V2V_RUN_DIR = 'deployment/demo'
+python -m uvicorn v2v.api:app
+```
+
+### Train a new synthetic run
+
+The CPU workflow works without a GPU. Start in a clean checkout, or unset `V2V_RUN_DIR` before serving the new run.
 
 ```bash
 python -m venv .venv
@@ -79,11 +103,11 @@ For the free dashboard demo, use the following settings.
 | Build command | `sh deployment/build.sh` |
 | Start command | `python -m uvicorn v2v.api:app --host 0.0.0.0 --port $PORT` |
 | Environment | `PYTHON_VERSION=3.12.13`, `NODE_VERSION=24.15.0`, `V2V_RUN_DIR=deployment/demo` |
-| HTTP health check | `/api/overview` |
+| Optional HTTP health check | `/api/overview` |
 
 The web service serves the Angular interface and FastAPI at the same origin.
 The bundled report and CSV in `deployment/demo` come from the synthetic smoke test.
-Model training and raw DeepSense data are managed separately from the public dashboard.
+Model training and raw DeepSense data are managed separately from the public dashboard. The active Render service uses manual deploys from `main`.
 
 ## Repository layout
 
