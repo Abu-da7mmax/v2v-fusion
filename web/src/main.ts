@@ -4,6 +4,7 @@ import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 
+import { SampleReplay } from './replay';
 import { scenarios, datasetUrl, paperUrl, evaluation, ablation } from './report';
 
 interface Overview {
@@ -167,14 +168,12 @@ class Dashboard implements OnInit {
 
 @Component({
   selector: 'project-app',
-  imports: [Dashboard, DecimalPipe],
+  imports: [Dashboard, DecimalPipe, SampleReplay],
   templateUrl: './report.html',
 })
 class ProjectApp {
   readonly sections = ['Dashboard', 'Dataset Explorer', 'How It Works', 'Results', 'Ablation', 'About', 'Demo'];
-  readonly tabs = ['Camera', 'RF', 'LiDAR', 'Predictions'];
   readonly section = signal('Dashboard');
-  readonly tab = signal('Predictions');
   readonly scenarios = scenarios;
   readonly scenario = signal(scenarios[0]);
   readonly datasetUrl = datasetUrl;

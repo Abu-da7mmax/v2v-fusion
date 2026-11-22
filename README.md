@@ -6,12 +6,19 @@ The senior project used synchronized RGB camera views, 3D LiDAR and 60 GHz beam 
 
 | Page | What to explore |
 | --- | --- |
-| **Dashboard** | An archived Scenario 36 example with the map, camera view, RF beam powers, LiDAR view and predicted pose. |
+| **Dashboard** | Select a sample, switch camera views, plot RF values and rotate the LiDAR point cloud. The bundled example uses four synthetic samples; open a local DeepSense scenario to replay real files. |
 | **Dataset Explorer** | Published routes, locations, lighting, sample counts, and collection statistics for Scenarios 36–39. |
 | **How It Works, Results, Ablation** | The original sensor-fusion architecture and the graduation report's results and modality comparisons. |
 | **Demo** | A runnable evaluation browser with 16 synthetic predictions, pagination and CSV export. |
 
-The hosted app serves archived report views and saved synthetic predictions. Raw DeepSense playback requires the recordings, and reproducing the original 3D evaluation requires the original model checkpoint and evaluation inputs. The Render free instance can take about a minute to start after a period of inactivity.
+The hosted app includes a synthetic sensor preview and archived evaluation tables. The browser can replay locally supplied DeepSense recordings. Reproducing the original 3D evaluation requires the original model checkpoint and evaluation inputs. The Render free instance can take about a minute to start after a period of inactivity.
+
+## Replay real DeepSense files
+
+1. Download and extract one scenario from the [official DeepSense-V2V portal](https://www.deepsense6g.net/scenarios/Scenarios%2030-39/scenarios-36-39). For Scenario 36, part 1 has the index CSV, GPS information, RF powers and RGB180 files. The later part has the other camera views and LiDAR. Download only the modalities you want to inspect.
+2. In **Dashboard**, select **Open DeepSense folder**. Choose the extracted folder containing `scenario36.csv` and `unit1/`. Keep file names and subfolders as referenced by the index CSV. The browser matches cameras `rgb1` through `rgb6`, four `pwr` files and the `lidar1` CSV by sample ID. For a smaller replay folder, copy the original index CSV and a subset of sensor files with the same relative paths. The list includes only rows with matching sensor files.
+3. Select a sample by ID or use Previous and Next. Available cameras have enabled buttons. The RF panel expects 64 numeric powers per file. The LiDAR panel reads XYZ in metres from CSV, draws up to 10,000 returns and supports rotation, tilt and zoom. The dashboard reads these files locally in the browser. Opening the external OpenStreetMap link sends the selected GPS location to OpenStreetMap.
+4. To compare model outputs, select **Load predictions CSV**. Join on the sensor index using `id`, `sample_id`, or `index`. A scenario-qualified ID such as `36/2674` also works. For a horizontal run use `pred_east_m,pred_north_m` and optional `east_m,north_m`. For the original pose format, map exported columns to `pred_dx,pred_dy,pred_dz,pred_heading_deg` and `true_dx,true_dy,true_dz,true_heading_deg`. X/Y are required in this format; Z, heading, and ground truth appear only where supplied. The GPS-derived east/north reference is shown when both geodetic positions are available. The viewer reads saved predictions and does not run inference on imported sensor files.
 
 ## Result provenance
 
@@ -89,7 +96,7 @@ Pass `--all` to the inspection command for a full decode check before a long run
 
 The camera and LiDAR CNNs and RF dense encoder feed a late-fusion regression head with two outputs, east and north in metres. GPS is used only for target construction. The Huber loss is optimized on the training split. The checkpoint with lowest validation loss is loaded once for the held-out test. The comparator always predicts the mean training offset. Mean, RMSE, median and P90 use the Euclidean norm of each two-axis residual.
 
-Each run saves `model.keras`, `history.json`, `split.json`, `predictions.csv` and `report.json` with parameters and manifest hashes. The Dashboard and Dataset Explorer reproduce the report navigation, archived sensor panels, route summaries and original evaluation tables. The Demo tab reads the current horizontal-position run from FastAPI and paginates the per-sample predictions. Keep the original sensor files and record their release version for forensic reproducibility. Seeded runs can still vary across hardware and TensorFlow versions.
+Each run saves `model.keras`, `history.json`, `split.json`, `predictions.csv` and `report.json` with parameters and manifest hashes. The Dashboard reads sensor files for the selected sample. Dataset Explorer and Results present the published routes, collection statistics and original evaluation tables. The Demo tab reads the current horizontal-position run from FastAPI and paginates the per-sample predictions. Keep the original sensor files and record their release version for forensic reproducibility. Seeded runs can still vary across hardware and TensorFlow versions.
 
 The target axes are geographic and the sensor tensors are vehicle-mounted. Without vehicle heading, the geographic direction can be ambiguous from a single snapshot. Test performance therefore depends on route coverage and sensor cues. GPS errors, synchronization offsets, beam sweep timing, and LiDAR cropping also affect the achievable accuracy. This is an offline localization experiment.
 

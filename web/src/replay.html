@@ -1,0 +1,138 @@
+<main class="replay">
+  <section class="source" aria-label="Data source">
+    <div>
+      <h1>Sample Dashboard</h1>
+      @if (replay(); as data) {
+        <p><strong>{{ data.label }}</strong> · {{ data.samples.length | number }} available samples</p>
+      }
+    </div>
+    <div class="source-actions">
+      <label class="action">Open DeepSense folder<input type="file" webkitdirectory multiple (change)="openScenario($event)"></label>
+      @if (replay()?.example === false) {
+        <label class="action">Load predictions CSV<input type="file" accept=".csv,text/csv" (change)="openPredictions($event)"></label>
+      }
+      <button type="button" class="action" (click)="loadExample()">Load synthetic example</button>
+    </div>
+    <p class="scope">Open an extracted Scenario 36–39 folder with its index CSV and sensor files. Files selected here are read on your device.</p>
+    @if (sourceStatus()) { <p class="notice" role="status">{{sourceStatus()}}</p> }
+    @if (importStatus()) { <p class="notice" role="status">{{importStatus()}}</p> }
+  </section>
+  @if (replay(); as data) {
+    @if (sample(); as current) {
+      <div class="sample-layout">
+        <aside class="selection">
+          <h2>Samples</h2>
+          <label for="sample-id">Sample ID</label>
+          <input id="sample-id" #sampleId list="sample-options" [value]="current.id"
+                 (change)="chooseId(sampleId)">
+          <datalist id="sample-options">
+            @for (item of data.samples.slice(0, 200); track item.id) { <option [value]="item.id"></option> }
+          </datalist>
+          <div class="navigation">
+            <button type="button" aria-label="Previous sample" [disabled]="selection() === 0" (click)="choose(selection() - 1)">Previous</button>
+            <button type="button" aria-label="Next sample" [disabled]="selection() + 1 === data.samples.length" (click)="choose(selection() + 1)">Next</button>
+          </div>
+          <p>{{selection() + 1 | number}} of {{data.samples.length | number}}</p>
+          @if (current.time) { <p>Timestamp<br>{{current.time}}</p> }
+        </aside>
+        <section class="position">
+          <h2>Vehicle positions</h2>
+          @if (gpsOffset(); as gps) {
+            <div class="position-grid" role="img" [attr.aria-label]="'GPS offset ' + gps[0].toFixed(2) + ' m east and ' + gps[1].toFixed(2) + ' m north'">
+              <span class="axis-n">North</span><span class="axis-e">East</span>
+              <i class="vehicle ego"></i>
+              <i class="vehicle target" [style.left.%]="plot(gps[0])" [style.bottom.%]="plot(gps[1])"></i>
+              @if (plottedPrediction(); as position) {
+                <i class="vehicle forecast" [style.left.%]="plot(position[0])" [style.bottom.%]="plot(position[1])"></i>
+              }
+            </div>
+            <p class="legend"><span class="chip ego"></span> Receiver <span class="chip target"></span> Peer GPS
+              @if (plottedPrediction()) { <span class="chip forecast"></span> Prediction }
+            </p>
+            <p>Local east/north axes · ±{{bound()}} m</p>
+            @if (current.ego; as gps) {
+              @if (!data.example) {
+                <a [href]="mapLink(gps)" target="_blank" rel="noopener noreferrer">View the receiver’s GPS location on OpenStreetMap</a>
+              }
+            }
+          } @else {
+            <p>Both vehicles’ GPS coordinates are needed to plot their relative position.</p>
+          }
+        </section>
+        <section class="sensor">
+          <nav aria-label="Sample panels">
+            @for (name of panels; track name) {
+              <button type="button" [attr.aria-pressed]="panel() === name" (click)="show(name)">{{name}}</button>
+            }
+          </nav>
+          <div class="sensor-content">
+            <h2>{{panel()}} · Sample {{current.id}}</h2>
+            @if (panelStatus()) { <p role="status">{{panelStatus()}}</p> }
+            @switch (panel()) {
+              @case ('Camera') {
+                <div class="subnav" aria-label="Camera views">
+                  @for (n of [1,2,3,4,5,6]; track n) {
+                    <button type="button" [disabled]="!hasCamera(n)"
+                      [attr.aria-pressed]="camera() === n" (click)="selectCamera(n)">Cam{{n}}</button>
+                  }
+                </div>
+                @if (cameraUrl()) {
+                  <img class="camera" [src]="cameraUrl()" [alt]="'Camera ' + camera() + ' frame for sample ' + current.id">
+                }
+                <p>{{current.camera.length}} of 6 views available for this sample.</p>
+              }
+              @case ('RF') {
+                @if (strongest(); as strongest) {
+                  <p>Strongest available beam: <strong>Pwr{{strongest.group + 1}} / {{strongest.beam}}</strong> · {{strongest.power | number:'1.0-8'}}</p>
+                  <p class="scope">Zero-based beam indices within each array. Bars show the values as recorded, without a dB conversion.</p>
+                }
+                @for (group of beams(); track $index; let array = $index) {
+                  @if (group; as powers) {
+                    <div class="beam-range"><span>Pwr{{array + 1}}</span><div class="beam-chart" role="img" [attr.aria-label]="'Plot of 64 recorded powers for array ' + (array + 1)">
+                      @for (power of powers; track $index) {
+                        <i [style.height.%]="chartHeight(power)" [style.background]="colors[array]" [title]="'Beam ' + $index + ': ' + power"></i>
+                      }
+                    </div></div>
+                  } @else { <p>Pwr{{array + 1}} unavailable</p> }
+                }
+              }
+              @case ('LiDAR') {
+                @if (points().length) {
+                  <canvas #pointCanvas width="700" height="400" aria-label="Rotatable projection of the XYZ LiDAR point cloud"></canvas>
+                  <div class="cloud-controls">
+                    <label>Rotation <input type="range" min="-180" max="180" [value]="azimuth()" (input)="azimuth.set($any($event.target).valueAsNumber)"></label>
+                    <label>Tilt <input type="range" min="0" max="90" [value]="tilt()" (input)="tilt.set($any($event.target).valueAsNumber)"></label>
+                    <label>Zoom <input type="range" min="0.5" max="6" step="0.1" [value]="zoom()" (input)="zoom.set($any($event.target).valueAsNumber)"></label>
+                  </div>
+                  <p>{{points().length | number}} XYZ points displayed. The gold square marks the sensor origin.</p>
+                }
+              }
+              @case ('Predictions') {
+                @if (pose(); as p) {
+                  <table>
+                    <thead><tr><th>Axis</th><th>Ground truth</th><th>Prediction</th></tr></thead>
+                    <tbody>
+                      @for (field of p.fields; track field; let i = $index) {
+                        <tr><th scope="row">{{field}}</th><td>{{(p.truth[i] | number:'1.2-2') ?? '—'}}</td>
+                          <td>{{(p.predicted[i] | number:'1.2-2') ?? '—'}}</td></tr>
+                      }
+                    </tbody>
+                  </table>
+                  @if (positionError() !== null) {
+                    <p>{{p.fields[0] === 'East (m)' ? 'Horizontal' : '3D'}} position error: <strong>{{positionError() | number:'1.2-2'}} m</strong></p>
+                  }
+                  @if (headingError() !== null) {
+                    <p>Heading error: <strong>{{headingError() | number:'1.2-2'}}°</strong></p>
+                  }
+                  @if (!hasPrediction()) { <p>Load the model’s prediction CSV to compare this sample.</p> }
+                } @else {
+                  <p>GPS or a matching model export is needed for this sample. Use Load predictions CSV to add exported predictions.</p>
+                }
+              }
+            }
+          </div>
+        </section>
+      </div>
+    }
+  }
+</main>

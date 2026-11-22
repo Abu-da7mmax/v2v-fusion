@@ -7,53 +7,7 @@
   </nav>
 </header>
 @switch (section()) {
-  @case ('Dashboard') {
-    <main class="dashboard">
-      <aside class="samples">
-        <h2>Samples</h2><p>Scenario 36</p>
-        <button class="selected" (click)="tab.set('Predictions')">Report sample<br><small>Figures 12–15</small></button>
-        <p class="note">The report supplies these views. Browsing the full sample list requires the extracted DeepSense files.</p>
-        <button class="outline" (click)="section.set('Dataset Explorer')">Dataset Explorer</button>
-      </aside>
-      <figure class="map">
-        <img src="evidence/map.webp" alt="Original OpenStreetMap dashboard capture with markers around Arizona State University in Tempe">
-        <figcaption>Original map capture · Scenario 36 · OpenStreetMap contributors</figcaption>
-      </figure>
-      <section class="inspect">
-        <nav aria-label="Sample panels">
-          @for (item of tabs; track item) {
-            <button [class.selected]="tab() === item" [attr.aria-pressed]="tab() === item" (click)="tab.set(item)">{{item}}</button>
-          }
-        </nav>
-        <div class="panel">
-          <h1>{{tab()}}</h1>
-          @switch (tab()) {
-            @case ('Camera') {
-              <p>Front-facing Cam1 · RGB frame from the receiver vehicle.</p>
-              <img src="evidence/camera.webp" alt="Original Cam1 road scene showing traffic and buildings in daylight">
-              <p>The report describes six available camera views. It shows the front-facing view for this example and uses 96 × 96 normalized RGB inputs for the vision encoder.</p>
-            }
-            @case ('RF') {
-              <p>Received beam powers · 4 arrays × 64 beams.</p>
-              <img src="evidence/rf.webp" alt="Original RF chart showing four groups of received beam powers">
-              <p>The report identifies beam index 161 as the strongest of the 256 concatenated values in this example. Beam strength helps estimate direction and can vary with blockage and reflections.</p>
-            }
-            @case ('LiDAR') {
-              <p>3D LiDAR point cloud · overhead view.</p>
-              <img src="evidence/lidar.webp" alt="Original LiDAR panel showing the scene point cloud">
-              <p>The screenshot displays about 10,000 points. The raw scan has roughly 32,000 points before filtering and feature extraction.</p>
-            }
-            @default {
-              <p>Ground truth and predicted X, Y, Z offsets and heading for the report sample.</p>
-              <img src="evidence/prediction.webp" alt="Original predictions panel with true and predicted offsets and heading">
-              <p>Position error measures the three-dimensional separation between the two offsets. Heading error is the angular difference.</p>
-            }
-          }
-          <p class="note">Archived view from the original graduation report. The raw sensor values behind the screenshot are required to replay or manipulate this sample.</p>
-        </div>
-      </section>
-    </main>
-  }
+  @case ('Dashboard') { <sample-replay /> }
   @case ('Dataset Explorer') {
     <main class="content">
       <h1>Dataset Explorer</h1>
@@ -118,7 +72,7 @@
   @case ('About') {
     <main class="content"><h1>About the Project</h1>
       <p>This graduation project estimates the pose of one vehicle relative to another using synchronized radio, vision and LiDAR measurements. The original system used TensorFlow, Angular and FastAPI.</p>
-      <p>The interface follows the report's dashboard layout and uses its original captured sample and evaluation tables. The Dataset Explorer documents all four releases. External data can be obtained through the official DeepSense portal.</p>
+      <p>The dashboard replays camera, RF, LiDAR and prediction data by sample. Dataset Explorer documents all four releases and Results presents the evaluation tables from the original report. Obtain the raw recordings from the official DeepSense portal.</p>
       <p><a [href]="datasetUrl">DeepSense-V2V dataset</a> · <a [href]="paperUrl">Dataset paper</a></p>
     </main>
   }
