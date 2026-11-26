@@ -18,7 +18,7 @@ The hosted app includes a synthetic sensor preview and archived evaluation table
 1. Download and extract one scenario from the [official DeepSense-V2V portal](https://www.deepsense6g.net/scenarios/Scenarios%2030-39/scenarios-36-39). For Scenario 36, part 1 has the index CSV, GPS information, RF powers and RGB180 files. The later part has the other camera views and LiDAR. Download only the modalities you want to inspect.
 2. In **Dashboard**, select **Open DeepSense folder**. Choose the extracted folder containing `scenario36.csv` and `unit1/`. Keep file names and subfolders as referenced by the index CSV. The browser matches cameras `rgb1` through `rgb6`, four `pwr` files and the `lidar1` CSV by sample ID. For a smaller replay folder, copy the original index CSV and a subset of sensor files with the same relative paths. The list includes only rows with matching sensor files.
 3. Select a sample by ID or use Previous and Next. Available cameras have enabled buttons. The RF panel expects 64 numeric powers per file. The LiDAR panel reads XYZ in metres from CSV, draws up to 10,000 returns and supports rotation, tilt and zoom. The dashboard reads these files locally in the browser. Opening the external OpenStreetMap link sends the selected GPS location to OpenStreetMap.
-4. To compare model outputs, select **Load predictions CSV**. Join on the sensor index using `id`, `sample_id`, or `index`. A scenario-qualified ID such as `36/2674` also works. For a horizontal run use `pred_east_m,pred_north_m` and optional `east_m,north_m`. For the original pose format, map exported columns to `pred_dx,pred_dy,pred_dz,pred_heading_deg` and `true_dx,true_dy,true_dz,true_heading_deg`. X/Y are required in this format; Z, heading, and ground truth appear only where supplied. The GPS-derived east/north reference is shown when both geodetic positions are available. The viewer reads saved predictions and does not run inference on imported sensor files.
+4. To compare model outputs, select **Load predictions CSV**. For Scenario 36, match the scenario CSV’s `abs_index` values using `id`, `sample_id`, or `index`. A scenario-qualified ID such as `36/2674` also works. For a horizontal run use `pred_east_m,pred_north_m` and optional `east_m,north_m`. For the original pose format, map exported columns to `pred_dx,pred_dy,pred_dz,pred_heading_deg` and `true_dx,true_dy,true_dz,true_heading_deg`. X/Y are required in this format; Z, heading, and ground truth appear only where supplied. The GPS-derived east/north reference is shown when both geodetic positions are available. The viewer reads saved predictions and does not run inference on imported sensor files.
 
 ## Result provenance
 
@@ -36,8 +36,6 @@ Use Python 3.12 and Node.js 24. Run commands from the repository root. To serve 
 python -m pip install fastapi==0.115.12 uvicorn==0.34.2
 npm --prefix web ci
 npm --prefix web run build
-export V2V_RUN_DIR=deployment/demo
-# PowerShell equivalent: $env:V2V_RUN_DIR = 'deployment/demo'
 python -m uvicorn v2v.api:app
 ```
 
@@ -62,6 +60,8 @@ npm run build
 cd ..
 python -m uvicorn v2v.api:app
 ```
+
+The API loads the bundled demo by default. A completed local run at `runs/demo` takes priority. Set `V2V_RUN_DIR` to serve a specific run.
 
 Open http://127.0.0.1:8000 for the dashboard and http://127.0.0.1:8000/docs for the API. For Angular development, run `npm start` inside `web/` while FastAPI is running, then open http://localhost:4200. It proxies `/api` to FastAPI. Use fresh demo and run directory names for repeated runs. The API supports an empty state before training.
 

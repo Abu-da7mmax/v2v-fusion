@@ -10,7 +10,15 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 ROOT = Path(__file__).resolve().parents[1]
-RUN = Path(os.environ.get("V2V_RUN_DIR", ROOT / "runs" / "demo"))
+LOCAL_RUN = ROOT / "runs" / "demo"
+BUNDLED_RUN = ROOT / "deployment" / "demo"
+configured_run = os.environ.get("V2V_RUN_DIR")
+if configured_run is not None:
+    RUN = Path(configured_run)
+elif all((LOCAL_RUN / name).is_file() for name in ("report.json", "predictions.csv")):
+    RUN = LOCAL_RUN
+else:
+    RUN = BUNDLED_RUN
 WEB = ROOT / "web" / "dist" / "dashboard" / "browser"
 app = FastAPI(title="V2V Fusion", version="1.0.0")
 

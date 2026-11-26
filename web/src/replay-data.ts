@@ -79,7 +79,7 @@ export async function importScenario(files: File[]): Promise<Replay> {
   const [header, ...rows] = csvRows(await index.text());
   if (!header || !rows.length) throw new Error('The scenario CSV has no samples.');
   const headers = new Map(header.map((name, i) => [key(name), i]));
-  const idColumn = ['index', 'sampleindex', 'sampleid', 'id', 'sample'].map(n => headers.get(n))
+  const idColumn = ['absindex', 'index', 'sampleindex', 'sampleid', 'id', 'sample'].map(n => headers.get(n))
     .find(i => i !== undefined) ?? 0;
   const timeColumn = ['timestamp', 'time', 'synchronizationtime', 'syncstamp', 'synctime']
     .map(n => headers.get(n)).find(i => i !== undefined);
