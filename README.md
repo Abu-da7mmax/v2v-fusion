@@ -61,14 +61,14 @@ cd ..
 python -m uvicorn v2v.api:app
 ```
 
-The API loads the bundled demo by default. A completed local run at `runs/demo` takes priority. Set `V2V_RUN_DIR` to serve a specific run.
+The API loads the bundled demo by default. A completed local run at `runs/demo` takes priority. Set `V2V_RUN_DIR` to serve a specific run containing both `report.json` and `predictions.csv`.
 
 Open http://127.0.0.1:8000 for the dashboard and http://127.0.0.1:8000/docs for the API. For Angular development, run `npm start` inside `web/` while FastAPI is running, then open http://localhost:4200. It proxies `/api` to FastAPI. Use fresh demo and run directory names for repeated runs. The API supports an empty state before training.
 
 ## Train and evaluate on DeepSense-V2V
 
 1. Sign in on the [official Scenarios 36–39 download page](https://www.deepsense6g.net/scenarios/Scenarios%2030-39/scenarios-36-39). For each scenario, download the GPS, receive power, RGB180 and CSV files from part 1, and LiDAR from the later part. Extract all selected volumes. Keep both units and their asset directories next to each scenario CSV, as described by the dataset provider. Radar, RGB90 and pickle files are unnecessary.
-2. Copy `configs/deepsense.example.json` to `configs/deepsense.local.json`. Set each CSV filename and replace the marked example column names with the exact names from the downloaded CSV. Inspect each CSV with the command below. Each row must describe one synchronized sample. Use two distinct RGB180 paths, the Unit 1 LiDAR path, and the four Unit 1 power paths in consistent array order across drives. Specify Unit 1 and Unit 2 GPS separately.
+2. Copy `configs/deepsense.example.json` to `configs/deepsense.local.json`. Set each CSV filename and replace the marked example column names with the exact names from the downloaded CSV. Inspect each CSV with the command below. The supplied Scenario 36 release uses `abs_index`, `unit1_lidar1`, `unit1_pwr1` through `unit1_pwr4`, and `unit1_gps1_lat`/`unit1_gps1_lon` and `unit2_gps1_lat`/`unit2_gps1_lon`. Camera paths are in `unit1_rgb1` through `unit1_rgb6`. Each row must describe one synchronized sample. Use two distinct RGB180 paths, the Unit 1 LiDAR path, and the four Unit 1 power paths in consistent array order across drives. Specify Unit 1 and Unit 2 GPS separately.
 3. Use `["latitude_column","longitude_column"]` for inline decimal degrees, or `["gps_path_column", 0, 1]` for a numeric GPS sidecar with latitude at flattened index 0 and longitude at index 1. Adjust indices to the file layout. Asset paths resolve relative to the CSV. Input shapes and supported formats are listed below. For a release-specific asset encoding outside this contract, convert it to an accepted numeric file and update the CSV path, keeping the synchronized ID. Record any quality filters, rejected-row counts, or format conversions alongside your run.
 4. Validate the manifest and train. The example uses Scenarios 36 and 38 for training, 37 for validation and 39 as the unseen test scenario. Decide the split before training. Use separate recordings for a smaller pilot and keep all synchronized rows from each recording in a single partition.
 

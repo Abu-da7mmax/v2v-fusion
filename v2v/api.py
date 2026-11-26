@@ -12,10 +12,17 @@ from fastapi.staticfiles import StaticFiles
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL_RUN = ROOT / "runs" / "demo"
 BUNDLED_RUN = ROOT / "deployment" / "demo"
+EVALUATION_FILES = ("report.json", "predictions.csv")
+
+
+def evaluation_available(run):
+    return all((run / name).is_file() for name in EVALUATION_FILES)
+
+
 configured_run = os.environ.get("V2V_RUN_DIR")
 if configured_run is not None:
     RUN = Path(configured_run)
-elif all((LOCAL_RUN / name).is_file() for name in ("report.json", "predictions.csv")):
+elif evaluation_available(LOCAL_RUN):
     RUN = LOCAL_RUN
 else:
     RUN = BUNDLED_RUN
@@ -29,13 +36,13 @@ def overview():
         "target": "Unit 2 relative to Unit 1 in local east/north metres",
         "modalities": ["360-degree RGB coverage", "3D LiDAR", "60 GHz beam powers"],
         "historical": {"approx_error_m": 3, "metric": "3D RMSE", "scenario": 36, "test_samples": 1000, "status": "original-report"},
-        "evaluation_available": (RUN / "report.json").is_file(),
+        "evaluation_available": evaluation_available(RUN),
     }
 
 
 @app.get("/api/results")
 def results():
-    if not (RUN / "report.json").is_file():
+    if not evaluation_available(RUN):
         raise HTTPException(404, "No completed evaluation is configured")
     return json.loads((RUN / "report.json").read_text())
 
@@ -53,7 +60,8 @@ def predictions(offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=5
 
 @app.get("/api/predictions.csv")
 def download():
-    results()
+    if not evaluation_available(RUN):
+        raise HTTPException(404, "No completed evaluation is configured")
     return FileResponse(RUN / "predictions.csv", filename="predictions.csv", media_type="text/csv")
 
 
