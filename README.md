@@ -4,6 +4,16 @@
 
 The senior project used synchronized RGB camera views, 3D LiDAR and 60 GHz beam powers to estimate relative vehicle pose. This repository presents the original evaluation and a runnable TensorFlow reconstruction for horizontal position estimation. FastAPI serves completed evaluation artifacts alongside the Angular dashboard.
 
+## Try it in your browser
+
+**No setup, account, or dataset download required.** [Open the live demo](https://v2v-fusion.onrender.com/). The first visit after a period of inactivity can take about a minute while Render starts the service.
+
+1. **Dashboard** — Click **Load synthetic example**, select a sample, switch camera views, and rotate the LiDAR point cloud. Compare the RF beam powers and position estimates for the selected sample.
+2. **Demo** — Explore predicted versus GPS east/north offsets for 16 bundled synthetic test samples.
+3. **How It Works**, **Results**, and **Ablation** — See how the original project combined the sensor inputs and review the results from the graduation report. The historical **3.0 m 3D RMSE** comes from that report. The interactive synthetic example is a separate demonstration.
+
+![Prediction results figure from the graduation report](web/public/evidence/prediction.webp)
+
 | Page | What to explore |
 | --- | --- |
 | **Dashboard** | Select a sample, switch camera views, plot RF values and rotate the LiDAR point cloud. The bundled example uses four synthetic samples; open a local DeepSense scenario to replay real files. |
