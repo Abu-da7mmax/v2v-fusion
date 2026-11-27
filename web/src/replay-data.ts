@@ -144,7 +144,7 @@ export function lidarPoints(text: string): XYZ[] {
   const points: XYZ[] = [];
   const stride = Math.max(1, Math.ceil((lines.length - first) / 10000));
   for (let i = first; i < lines.length; i += stride) {
-    const cells = split(lines[i]);
+    const cells = split(lines[i]).map(cell => cell.replace(/^\s*"|"\s*$/g, ''));
     const point = order.map(index => value(cells[index]));
     if (point.every(n => n !== null) && point.some(Boolean)) points.push(point as XYZ);
   }
@@ -172,7 +172,7 @@ export function predictions(text: string, samples: Sample[], scenario: string) {
   if (!header || !rows.length) throw new Error('The predictions CSV has no samples.');
   const headers = new Map(header.map((name, i) => [key(name), i]));
   const find = (...names: string[]) => names.map(n => headers.get(n)).find(i => i !== undefined);
-  const id = find('id', 'sampleid', 'index', 'sampleindex');
+  const id = find('absindex', 'id', 'sampleid', 'index', 'sampleindex');
   const east = find('predeastm'), north = find('prednorthm');
   const x = find('preddx', 'preddxm', 'predx'), y = find('preddy', 'preddym', 'predy');
   const z = find('preddz', 'preddzm', 'predz'), heading = find('predheadingdeg', 'predheading');

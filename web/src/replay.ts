@@ -33,6 +33,7 @@ export class SampleReplay {
   readonly importedPoses = signal<ReturnType<typeof predictions>>(new Map());
   readonly camera = signal<number | null>(null);
   readonly cameraUrl = signal('');
+  readonly cameraError = signal(false);
   readonly beams = signal<(number[] | null)[]>([]);
   readonly points = signal<XYZ[]>([]);
   readonly azimuth = signal(0);
@@ -84,9 +85,10 @@ export class SampleReplay {
   });
   readonly range = computed(() => {
     const powers = this.beams().flatMap(group => group ?? []);
-    const min = Math.min(0, ...powers);
-    const max = Math.max(...powers);
-    return [min, max > min ? max : min + 1];
+    if (!powers.length) return [0, 1];
+    const min = Math.min(...powers), max = Math.max(...powers);
+    const baseline = min >= 0 ? 0 : min;
+    return [baseline, max > baseline ? max : baseline + 1];
   });
   readonly colors = colors;
 
@@ -183,6 +185,7 @@ export class SampleReplay {
 
   selectCamera(number: number | null) {
     this.camera.set(number);
+    this.cameraError.set(false);
     this.releaseCamera();
     const file = this.sample()?.camera.find(c => c.number === number)?.file;
     if (file instanceof File) this.objectUrl = URL.createObjectURL(file);
@@ -232,7 +235,7 @@ export class SampleReplay {
 
   chartHeight(value: number) {
     const [min, max] = this.range();
-    return Math.max(1, (value - min) / (max - min) * 100);
+    return (value - min) / (max - min) * 100;
   }
 
   plot(value: number) { return 50 + 50 * value / this.bound(); }

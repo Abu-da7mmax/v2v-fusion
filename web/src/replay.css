@@ -36,3 +36,18 @@ button:disabled{opacity:.45;cursor:default}
 .cloud-controls input{width:100%;display:block}
 @media(max-width:900px){.sample-layout{grid-template-columns:minmax(135px,.55fr) minmax(0,1fr)}.sensor{grid-column:1/-1}}
 @media(max-width:520px){.replay{padding:8px}.sample-layout{grid-template-columns:1fr}.sensor{grid-column:auto}}
+.source{padding:clamp(16px,3vw,30px);gap:12px 18px;background:linear-gradient(128deg,#edf5ff,#fff 72%)}
+.source h1{font-size:clamp(1.5rem,3vw,2.25rem);letter-spacing:-.035em}
+.source-label{display:inline-block;color:#1b477c;font-weight:650}
+.source details{flex:1 1 100%;color:#405571;line-height:1.55}
+.source summary{cursor:pointer;width:fit-content}
+.source details p{margin-top:6px}
+.source-actions .action:first-child{background:#144eaa;border-color:#144eaa;color:#fff}
+.camera-frame{margin:10px 0 0}
+.camera-frame .camera{margin:0;max-height:64vh;min-height:180px;object-fit:contain;background:#142139}
+.camera-frame figcaption{padding-left:0}
+.empty{border:1px dashed #a9bbd2;border-radius:6px;padding:14px;color:#405571}
+.sensor-content{overflow-wrap:anywhere}
+.beam-chart{height:clamp(46px,8vw,72px);gap:0}
+.beam-chart i:not(:last-child){border-right:1px solid #ffffff45}
+:focus-visible{outline:2px solid #2364cb;outline-offset:2px}

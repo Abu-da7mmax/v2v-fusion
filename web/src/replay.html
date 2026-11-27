@@ -1,9 +1,9 @@
 <main class="replay">
   <section class="source" aria-label="Data source">
     <div>
-      <h1>Sample Dashboard</h1>
+      <h1>Replay synchronized sensor data</h1>
       @if (replay(); as data) {
-        <p><strong>{{ data.label }}</strong> · {{ data.samples.length | number }} available samples</p>
+        <p class="source-label">{{ data.label }} · {{ data.samples.length | number }} available samples</p>
       }
     </div>
     <div class="source-actions">
@@ -13,7 +13,13 @@
       }
       <button type="button" class="action" (click)="loadExample()">Load synthetic example</button>
     </div>
-    <p class="scope">Open an extracted Scenario 36–39 folder with its index CSV and sensor files. Files selected here are read on your device.</p>
+    @if (replay()?.example) {
+      <p class="scope">Try the controls with generated camera frames, RF measurements and LiDAR points. The example includes two camera views per sample.</p>
+    }
+    <details>
+      <summary>How to open a DeepSense recording</summary>
+      <p>Choose an extracted Scenario 36–39 folder that contains its scenario CSV beside <code>unit1/</code>. The viewer matches files by path and reads them on your device. To compare estimates, load a predictions CSV with the matching sample IDs.</p>
+    </details>
     @if (sourceStatus()) { <p class="notice" role="status">{{sourceStatus()}}</p> }
     @if (importStatus()) { <p class="notice" role="status">{{importStatus()}}</p> }
   </section>
@@ -49,7 +55,7 @@
             <p class="legend"><span class="chip ego"></span> Receiver <span class="chip target"></span> Peer GPS
               @if (plottedPrediction()) { <span class="chip forecast"></span> Prediction }
             </p>
-            <p>Local east/north axes · ±{{bound()}} m</p>
+            <p>Local east/north axes · ±{{bound()}} m</p><p class="scope">The receiver is the origin. The green point shows the peer vehicle’s offset derived from GPS.</p>
             @if (current.ego; as gps) {
               @if (!data.example) {
                 <a [href]="mapLink(gps)" target="_blank" rel="noopener noreferrer">View the receiver’s GPS location on OpenStreetMap</a>
@@ -76,15 +82,21 @@
                       [attr.aria-pressed]="camera() === n" (click)="selectCamera(n)">Cam{{n}}</button>
                   }
                 </div>
-                @if (cameraUrl()) {
-                  <img class="camera" [src]="cameraUrl()" [alt]="'Camera ' + camera() + ' frame for sample ' + current.id">
+                @if (cameraUrl() && !cameraError()) {
+                  <figure class="camera-frame">
+                    <img class="camera" [src]="cameraUrl()" (error)="cameraError.set(true)"
+                         [alt]="(data.example ? 'Generated ' : '') + 'Cam' + camera() + ' frame for sample ' + current.id">
+                    <figcaption>Cam{{camera()}} · Sample {{current.id}}</figcaption>
+                  </figure>
+                } @else {
+                  <p class="empty" role="status">{{cameraError() ? 'This camera file could not be displayed. Try another view or check the extracted image.' : 'This sample has no matching RGB image files.'}}</p>
                 }
-                <p>{{current.camera.length}} of 6 views available for this sample.</p>
+                <p class="scope">{{current.camera.length}} of 6 views available. Disabled buttons indicate missing camera files for this sample.</p>
               }
               @case ('RF') {
                 @if (strongest(); as strongest) {
                   <p>Strongest available beam: <strong>Pwr{{strongest.group + 1}} / {{strongest.beam}}</strong> · {{strongest.power | number:'1.0-8'}}</p>
-                  <p class="scope">Zero-based beam indices within each array. Bars show the values as recorded, without a dB conversion.</p>
+                  <p class="scope">Each array has 64 beams numbered 0–63. Bars share one scale in the units of the source file. For signed data, the smallest value shown is the chart baseline.</p>
                 }
                 @for (group of beams(); track $index; let array = $index) {
                   @if (group; as powers) {
@@ -104,12 +116,12 @@
                     <label>Tilt <input type="range" min="0" max="90" [value]="tilt()" (input)="tilt.set($any($event.target).valueAsNumber)"></label>
                     <label>Zoom <input type="range" min="0.5" max="6" step="0.1" [value]="zoom()" (input)="zoom.set($any($event.target).valueAsNumber)"></label>
                   </div>
-                  <p>{{points().length | number}} XYZ points displayed. The gold square marks the sensor origin.</p>
+                  <p>{{points().length | number}} XYZ points displayed. The gold square marks the sensor origin. Use rotation and tilt to inspect the scene from another angle.</p>
                 }
               }
               @case ('Predictions') {
                 @if (pose(); as p) {
-                  <table>
+                  <div class="scroll"><table>
                     <thead><tr><th>Axis</th><th>Ground truth</th><th>Prediction</th></tr></thead>
                     <tbody>
                       @for (field of p.fields; track field; let i = $index) {
@@ -117,7 +129,7 @@
                           <td>{{(p.predicted[i] | number:'1.2-2') ?? '—'}}</td></tr>
                       }
                     </tbody>
-                  </table>
+                  </table></div>
                   @if (positionError() !== null) {
                     <p>{{p.fields[0] === 'East (m)' ? 'Horizontal' : '3D'}} position error: <strong>{{positionError() | number:'1.2-2'}} m</strong></p>
                   }

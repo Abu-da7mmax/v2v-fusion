@@ -19,7 +19,12 @@
       </nav>
       @let item = scenario();
       <section class="scenario">
-        <figure><img [src]="'evidence/' + item.id + '.webp'" [alt]="'Published collection route for scenario ' + item.id"><figcaption>GPS route shown in the original report, figures 10–11.</figcaption></figure>
+        <figure>
+          <a [href]="'evidence/' + item.id + '.webp'" target="_blank" rel="noopener" [attr.aria-label]="'Open full-size route map for Scenario ' + item.id">
+            <img [src]="'evidence/' + item.id + '.webp'" [alt]="'GPS route around ' + item.location + ' for Scenario ' + item.id">
+          </a>
+          <figcaption>Collection route from the original report, Figures 10–11. Select the map to open it at full size.</figcaption>
+        </figure>
         <article>
           <h2>{{item.location}}, Arizona</h2><p>{{item.mode}} · {{item.light}}</p>
           <dl><dt>Synchronized samples</dt><dd>{{item.count | number}}</dd><dt>Collection duration</dt><dd>{{item.duration}}</dd><dt>Distance traveled</dt><dd>{{item.distance}} km</dd><dt>Average speed</dt><dd>{{item.speed}} km/h</dd></dl>
@@ -28,14 +33,14 @@
         </article>
       </section>
       <h2>What each sample contains</h2>
-      <table><thead><tr><th>Modality</th><th>Available data and role</th></tr></thead><tbody>
+      <div class="scroll"><table><thead><tr><th>Modality</th><th>Available data and role</th></tr></thead><tbody>
         <tr><th>RGB</th><td>Four 90° or two 180° views from the 360° receiver camera, offering road and object context.</td></tr>
         <tr><th>LiDAR</th><td>One 3D receiver point cloud, about 32,000 raw points. XYZ and additional return measurements describe scene geometry.</td></tr>
         <tr><th>RF</th><td>Four 64-beam receive-power vectors at about 60 GHz. Each sweep describes link strength across beam directions.</td></tr>
         <tr><th>GPS</th><td>Both vehicles’ coordinates. Their relative position supplies supervision for pose estimation.</td></tr>
-        <tr><th>Radar</th><td>Four FMCW radar measurements are included in the dataset. The senior project fuses RF, RGB and LiDAR.</td></tr>
+        <tr><th>Radar</th><td>DeepSense includes four FMCW radar recordings. The original fusion uses RF beam power, RGB and LiDAR. Raw radar playback is pending.</td></tr>
         <tr><th>Index CSV</th><td>Sample index, timestamps, metadata and paths to synchronized sensor files.</td></tr>
-      </tbody></table>
+      </tbody></table></div>
       <p><a [href]="datasetUrl">Official data downloads and scenario videos</a> · <a [href]="paperUrl">Dataset paper and route statistics</a></p>
     </main>
   }
@@ -48,8 +53,10 @@
         <article><h2>Vision encoder</h2><p>Resize the RGB input to 96 × 96 and normalize it. EfficientNetB0 extracts image features for fusion.</p></article>
         <article><h2>LiDAR encoder</h2><p>Filter zero-range points. Compute mean, standard deviation, minimum, maximum and the 25th and 75th percentiles for each of five channels to form 30 features.</p></article>
       </section>
-      <h2>Cross-modal attention</h2><p>The three modality embeddings form a three-token sequence. Two self-attention layers let each sensor representation interact with the other two. Separate heads predict position and heading.</p>
+      <h2>Cross-modal attention in the original model</h2><p>The three modality embeddings form a three-token sequence. Two self-attention layers let each sensor representation interact with the other two. Separate heads predict position and heading.</p>
       <h2>Evaluation</h2><p>For each sample, the 3D position error is the Euclidean distance between predicted and true offsets. RMSE gives more weight to large errors. Median describes the midpoint of the errors and P90 the value below which 90% fall. Heading accuracy counts predictions within an angular tolerance.</p>
+      <h2>Model in this repository</h2>
+      <p>The runnable example uses camera, LiDAR and RF encoders with a late-fusion layer to predict east and north offsets. Open Demo to inspect the synthetic test run. Use Results for the original report’s 3D and heading metrics.</p>
     </main>
   }
   @case ('Results') {
@@ -72,7 +79,7 @@
   @case ('About') {
     <main class="content"><h1>About the Project</h1>
       <p>This graduation project estimates the pose of one vehicle relative to another using synchronized radio, vision and LiDAR measurements. The original system used TensorFlow, Angular and FastAPI.</p>
-      <p>The dashboard replays camera, RF, LiDAR and prediction data by sample. Dataset Explorer documents all four releases and Results presents the evaluation tables from the original report. Obtain the raw recordings from the official DeepSense portal.</p>
+      <p>The dashboard reads camera, RF and LiDAR files by sample. It matches saved predictions by sample ID and plots their horizontal offsets alongside GPS when available. Dataset Explorer documents all four releases and Results presents the evaluation tables from the original report. Obtain the raw recordings from the official DeepSense portal.</p>
       <p><a [href]="datasetUrl">DeepSense-V2V dataset</a> · <a [href]="paperUrl">Dataset paper</a></p>
     </main>
   }
